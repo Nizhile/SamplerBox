@@ -4,24 +4,9 @@ import struct
 import wave
 from chunk import Chunk
 
-#wf = wave.open("0 Saw/36.wav", "r")
-#>>> wf.getframerate()
-#44100
-#>>> wf.getnframes()
-#8764
-
-#pi@raspberrypi:~/Documents/SamplerBox $ python analyse_wav.py 0\ Saw/36.wav
-#fmt
-#data
-#sample
-#1
-#loop 0 [0:8763]
-
-# duration in Audacity 00h00m00.199s
-# nframes/framerate
-#>>> 8764.0 / 44100
-#0.19873015873015873
-
+# Add a 'smpl' chunk to the wave file matching audacity-markers
+# Usage: python add_sample_loop.py <sample.wav> <audacity-markers.txt>
+# *Note:* sample.wav will be modified, be sure to work on a copy from your sample 
 
 if len(sys.argv) != 3 :
     print("Usage: " + sys.argv[0] + " <sample.wav> <audacity-markers.txt>")
@@ -70,8 +55,11 @@ resultf.write("smpl")
 chunksize = 36 + 24 * nloops
 encodedsize = struct.pack("<i", chunksize)
 resultf.write(encodedsize)
-header = struct.pack('<iiiiiiiii', 0, 0, 0, 0, 0, 0, 0, nloops, 0)
+# must be restore to add all loops found in marker file
+#header = struct.pack('<iiiiiiiii', 0, 0, 0, 0, 0, 0, 0, nloops, 0)
+header = struct.pack('<iiiiiiiii', 0, 0, 0, 0, 0, 0, 0, 1, 0)
 resultf.write(header)
+# bug: should iterate loops - currently add only the last one
 sampleinfo = struct.pack('<iiiiii', 0, 0, startframe, endframe, 0, 0)
 resultf.write(sampleinfo)
 
